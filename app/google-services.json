@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "122131377383",
+    "project_id": "funny-gifs"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:122131377383:android:08b81ca1f7441fbb",
+        "android_client_info": {
+          "package_name": "com.funnygifs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBYkfkrpKnpxHLqNe5a18nAkwVyfU48xc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-65897021-3"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

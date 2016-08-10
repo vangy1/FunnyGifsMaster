@@ -1,0 +1,43 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'FunnyGifsMaster'
+            keyPassword '37126094'
+            storeFile file('C:/Users/Rasto/Desktop/FunnyGifs.jks')
+            storePassword '37126094'
+        }
+    }
+    compileSdkVersion 24
+    buildToolsVersion "23.0.3"
+    defaultConfig {
+        applicationId "com.funnygifs"
+        minSdkVersion 16
+        targetSdkVersion 24
+        versionCode 5
+        versionName "2.0.1"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:24.1.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha4'
+    compile 'com.android.support:design:24.1.1'
+    compile 'com.android.support:cardview-v7:24.1.1'
+    compile 'com.android.support:recyclerview-v7:24.1.1'
+    compile 'com.github.eneim:Toro:1.2.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'pub.devrel:easypermissions:0.1.9'
+    compile 'com.google.android.gms:play-services-analytics:9.4.0'
+}
+apply plugin: 'com.google.gms.google-services'
+
