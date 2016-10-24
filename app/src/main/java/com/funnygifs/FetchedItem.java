@@ -1,52 +1,52 @@
 package com.funnygifs;
 
 public class FetchedItem {
-    private String mId;
-    private String mUrl;
-    private String mDownloadUrl;
-    private String mShareUrl;
-    private String mTitle;
-    private String mPlaceholder;
+    private String id;
+    private String url;
+    private String downloadUrl;
+    private String shareUrl;
+    private String title;
+    private String placeholder;
 
     public String getId() {
-        return mId;
+        return id;
     }
 
-    public void setId(String mId) {
-        this.mId = mId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTitle() {
-        return mTitle;
+        return title;
     }
 
-    public void setTitle(String mTitle) {
-        this.mTitle = mTitle;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getUrl() {
-        return mUrl;
+        return url;
     }
     public String getShareUrl() {
-        return mShareUrl;
+        return shareUrl;
     }
     public String getDownloadUrl() {
-        return mDownloadUrl;
+        return downloadUrl;
     }
 
     public String getPlaceholder() {
-        return mPlaceholder;
+        return placeholder;
     }
 
-    public void setPlaceholder(String mPlaceholder) {
-        this.mPlaceholder = mPlaceholder;
+    public void setPlaceholder(String placeholder) {
+        this.placeholder = placeholder;
     }
 
-    public void setUrl(String mUrl) {
-        this.mUrl = mUrl;
-        String mShareUrl = mUrl.replace(".mp4","");
-        String mDownloadUrl = mUrl.replace(".mp4",".gif");
-        this.mShareUrl = mShareUrl;
-        this.mDownloadUrl = mDownloadUrl;
+    public void setUrl(String url) {
+        this.url = url;
+        String shareUrl = url.replace(".mp4", "");
+        String downloadUrl = url.replace(".mp4", ".gif");
+        this.shareUrl = shareUrl;
+        this.downloadUrl = downloadUrl;
     }
 }

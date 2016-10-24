@@ -17,20 +17,22 @@ import static android.content.Context.MODE_PRIVATE;
 
 
 public class RecyclerAdapter extends ToroAdapter<SimpleViewHolder> {
-    private List<FetchedItem> mFetchedItems;
-    private Tracker mTracker;
-    private Activity mContext;
+    private List<FetchedItem> fetchedItems;
+    private Tracker tracker;
+    private Activity context;
     private SimpleViewHolder simpleViewHolder;
+    private SharedPreferences prefs;
 
-    public RecyclerAdapter(List<FetchedItem> galleryItems, Tracker tracker, Activity context) {
+
+    public RecyclerAdapter(List<FetchedItem> fetchedItems, Tracker tracker, Activity context) {
         super();
-        mFetchedItems = galleryItems;
-        mTracker = tracker;
-        mContext = context;
+        this.fetchedItems = fetchedItems;
+        this.tracker = tracker;
+        this.context = context;
+        prefs = context.getSharedPreferences("Download", MODE_PRIVATE);
     }
 
     public void downloadAfterPermissionGranted() {
-        SharedPreferences prefs = mContext.getSharedPreferences("Download", MODE_PRIVATE);
         String url = prefs.getString("GifUrl","");
         String title = prefs.getString("GifTitle","");
         simpleViewHolder.downloadAfterPermissionGranted(url,title);
@@ -38,19 +40,19 @@ public class RecyclerAdapter extends ToroAdapter<SimpleViewHolder> {
 
     @Override
     protected Object getItem(int position) {
-        return mFetchedItems.get(position % mFetchedItems.size());
+        return fetchedItems.get(position % fetchedItems.size());
     }
 
     @Override
     public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recycler_view, parent, false);
-        simpleViewHolder = new SimpleViewHolder((CardView) v, mTracker, mContext);
+        simpleViewHolder = new SimpleViewHolder((CardView) v, tracker, context);
         return simpleViewHolder;
     }
 
     @Override
     public int getItemCount() {
-        return mFetchedItems.size();
+        return fetchedItems.size();
     }
 }

@@ -99,7 +99,7 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:paddingTop="8dp"
-                android:src="@drawable/ic_file_download_black_24dp"
+                android:src="@drawable/button_download"
                 android:contentDescription="Download" />
 
             <ImageButton
@@ -112,7 +112,7 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="14dp"
                 android:paddingTop="8dp"
-                android:src="@drawable/ic_share_black_24dp"
+                android:src="@drawable/button_share"
                 android:contentDescription="Share" />
 
         </LinearLayout>

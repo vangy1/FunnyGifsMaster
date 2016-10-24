@@ -25,115 +25,46 @@ import im.ene.lab.toro.Toro;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView mRecyclerView;
-    private RecyclerAdapter recyclerAdapter;
-    private LinearLayoutManager mLayoutManager;
-    private List<FetchedItem> mItems = new ArrayList<>();
-    private int previousTotal = 0;
-    private boolean loading = true;
-    private int visibleThreshold = 5;
+    private Toolbar toolbar;
+    private TextView toolbarTitle;
+
+    private Tracker mTracker;
+
     private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
-    private int firstVisibleItem, visibleItemCount, totalItemCount;
-    private Tracker mTracker;
+
+    private LinearLayoutManager mLayoutManager;
+    private RecyclerView recyclerView;
+    private RecyclerAdapter recyclerAdapter;
+
+    private List<FetchedItem> mItems = new ArrayList<>();
+    private int previousTotal = 0;
+    private int visibleThreshold = 5;
+    private boolean loading = true;
+
+    private int firstVisibleItem;
+    private int visibleItemCount;
+    private int totalItemCount;
+
+    private String idOldest;
+    private String idNewest;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        AnalyticsApplication application = (AnalyticsApplication) getApplication();
-        mTracker = application.getDefaultTracker();
-        sendScreenImageName();
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        Typeface serifa = Typeface.createFromAsset(getAssets(), "Serifa.ttf");
-        TextView toolbarTitle = (TextView) findViewById(R.id.toolbar_title);
-        toolbarTitle.setTypeface(serifa);
-
         Toro.attach(this);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        prefs = getSharedPreferences("Positions", MODE_PRIVATE);
-        editor = prefs.edit();
+        findViewsByIds();
+        setToolbar();
+        setupAnalytics();
+        getSharedPrefrences();
+        setupRecyclerView();
 
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        Toro.register(recyclerView);
 
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (!mItems.isEmpty()) {
-                    super.onScrolled(recyclerView, dx, dy);
-
-                    visibleItemCount = mRecyclerView.getChildCount();
-                    totalItemCount = mLayoutManager.getItemCount();
-                    firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
-
-                    String idNewest = mItems.get(0).getId();
-                    String idOldest = mItems.get(mLayoutManager.findLastVisibleItemPosition()).getId();
-
-                    if (prefs.contains("idNew") && prefs.contains("idOld")) {
-                        String idNewestBefore = prefs.getString("idNew", "9999");
-                        String idOldestBefore = prefs.getString("idOld", "9999");
-
-                        if (Integer.valueOf(idNewest) > Integer.valueOf(idNewestBefore))
-                            editor.putString("idNew", idNewest);
-                        if (Integer.valueOf(idOldest) < Integer.valueOf(idOldestBefore))
-                            editor.putString("idOld", idOldest);
-                        editor.apply();
-                    } else {
-                        editor.putString("idNew", idNewest);
-                        editor.putString("idOld", idOldest);
-                        editor.apply();
-                    }
-
-                    if (loading) {
-                        if (totalItemCount > previousTotal) {
-                            loading = false;
-                            previousTotal = totalItemCount;
-                        }
-                    }
-                    if (!loading && (totalItemCount - visibleItemCount)
-                            <= (firstVisibleItem + visibleThreshold)) {
-                        loading = true;
-                        prefs = getSharedPreferences("Positions", MODE_PRIVATE);
-
-                        idNewest = mItems.get(0).getId();
-                        idOldest = mItems.get(mItems.size() - 1).getId();
-
-                        if (prefs.contains("idNew") && prefs.contains("idOld")) {
-                            String idNewestBefore = prefs.getString("idNew", "9999");
-                            String idOldestBefore = prefs.getString("idOld", "9999");
-                            if (Integer.valueOf(idNewest) > Integer.valueOf(idNewestBefore))
-                                editor.putString("idNew", idNewest);
-                            else
-                                idNewest = idNewestBefore;
-                            if (Integer.valueOf(idOldest) < Integer.valueOf(idOldestBefore))
-                                editor.putString("idOld", idOldest);
-                            else
-                                idOldest = idOldestBefore;
-                            editor.apply();
-                        } else {
-                            editor.putString("idNew", idNewest);
-                            editor.putString("idOld", idOldest);
-
-                            editor.apply();
-                        }
-                        new FetchItemsTask("http://funnygifs.media/getposts?before=" + idNewest + "&after=" + idOldest).execute();
-
-                    }
-                }
-            }
-        });
-        Toro.register(mRecyclerView);
-
-
-        prefs = getSharedPreferences("Positions", MODE_PRIVATE);
         if (prefs.contains("idNew") && prefs.contains("idOld")) {
             String idNewest = prefs.getString("idNew", "1000");
             String idOldest = prefs.getString("idOld", "1000");
@@ -144,11 +75,105 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void findViewsByIds() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        toolbarTitle = (TextView) findViewById(R.id.toolbar_title);
+    }
+
+    private void setToolbar() {
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        Typeface serifa = Typeface.createFromAsset(getAssets(), "Serifa.ttf");
+        toolbarTitle.setTypeface(serifa);
+    }
+
+    private void setupAnalytics() {
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+        sendScreenImageName();
+    }
+
+    private void getSharedPrefrences() {
+        prefs = getSharedPreferences("Positions", MODE_PRIVATE);
+        editor = prefs.edit();
+    }
+
+    private void setupRecyclerView() {
+        mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (!mItems.isEmpty()) {
+                    super.onScrolled(recyclerView, dx, dy);
+
+                    getItemsCountAndFirstVisible();
+                    getOldestAndNewestIds();
+                    updateViewedGifs();
+                    checkIfLoadingIsDone();
+                    loadNewGifs();
+                }
+            }
+        });
+    }
+
+    private void getItemsCountAndFirstVisible() {
+        visibleItemCount = recyclerView.getChildCount();
+        totalItemCount = mLayoutManager.getItemCount();
+        firstVisibleItem = mLayoutManager.findFirstVisibleItemPosition();
+    }
+
+    private void getOldestAndNewestIds() {
+        idOldest = mItems.get(mLayoutManager.findLastVisibleItemPosition()).getId();
+        idNewest = mItems.get(0).getId();
+    }
+
+    private void updateViewedGifs() {
+        if (prefs.contains("idNew") && prefs.contains("idOld")) {
+            String idNewestBefore = prefs.getString("idNew", "9999");
+            String idOldestBefore = prefs.getString("idOld", "9999");
+
+            if (Integer.valueOf(idNewest) > Integer.valueOf(idNewestBefore))
+                editor.putString("idNew", idNewest);
+            if (Integer.valueOf(idOldest) < Integer.valueOf(idOldestBefore))
+                editor.putString("idOld", idOldest);
+            editor.apply();
+        } else {
+            editor.putString("idNew", idNewest);
+            editor.putString("idOld", idOldest);
+            editor.apply();
+        }
+    }
+
+    private void checkIfLoadingIsDone() {
+        if (loading) {
+            if (totalItemCount > previousTotal) {
+                loading = false;
+                previousTotal = totalItemCount;
+            }
+        }
+    }
+
+    private void loadNewGifs() {
+        if (!loading && (totalItemCount - visibleItemCount)
+                <= (firstVisibleItem + visibleThreshold)) {
+            loading = true;
+
+            idNewest = mItems.get(0).getId();
+            idOldest = mItems.get(mItems.size() - 1).getId();
+
+            updateViewedGifs();
+
+            new FetchItemsTask("http://funnygifs.media/getposts?before=" + idNewest + "&after=" + idOldest).execute();
+        }
+    }
+
     private class FetchItemsTask extends AsyncTask<Void, Void, List<FetchedItem>> {
         private String link;
 
-        FetchItemsTask(String linkPassed) {
-            link = linkPassed;
+        FetchItemsTask(String link) {
+            this.link = link;
         }
 
         @Override
@@ -159,11 +184,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<FetchedItem> items) {
             mItems.addAll(items);
-            if (mRecyclerView.getAdapter() == null) {
+            if (recyclerView.getAdapter() == null) {
                 recyclerAdapter = new RecyclerAdapter(mItems, mTracker, MainActivity.this);
-                mRecyclerView.setAdapter(recyclerAdapter);
+                recyclerView.setAdapter(recyclerAdapter);
             } else
-                mRecyclerView.getAdapter().notifyDataSetChanged();
+                recyclerView.getAdapter().notifyDataSetChanged();
         }
     }
 
@@ -179,24 +204,10 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.refresh) {
             if (!mItems.isEmpty()) {
 
-                String idNewest = mItems.get(0).getId();
-                String idOldest = mItems.get(mLayoutManager.findLastVisibleItemPosition()).getId();
+                idNewest = mItems.get(0).getId();
+                idOldest = mItems.get(mLayoutManager.findLastVisibleItemPosition()).getId();
 
-                prefs = getSharedPreferences("Positions", MODE_PRIVATE);
-
-                if (prefs.contains("idNew") && prefs.contains("idOld")) {
-                    String idNewestBefore = prefs.getString("idNew", "9999");
-                    String idOldestBefore = prefs.getString("idOld", "9999");
-                    if (Integer.valueOf(idNewest) > Integer.valueOf(idNewestBefore))
-                        editor.putString("idNew", idNewest);
-                    if (Integer.valueOf(idOldest) < Integer.valueOf(idOldestBefore))
-                        editor.putString("idOld", idOldest);
-                    editor.apply();
-                } else {
-                    editor.putString("idNew", idNewest);
-                    editor.putString("idOld", idOldest);
-                    editor.apply();
-                }
+                updateViewedGifs();
 
                 mItems.clear();
 
@@ -207,17 +218,16 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     new FetchItemsTask("http://funnygifs.media/getposts").execute();
                 }
-                mRecyclerView.scrollToPosition(0);
+                recyclerView.scrollToPosition(0);
             }
         }
-
         return super.onOptionsItemSelected(item);
     }
 
 
     @Override
     protected void onDestroy() {
-        Toro.unregister(mRecyclerView);
+        Toro.unregister(recyclerView);
         Toro.detach(this);
         super.onDestroy();
     }
@@ -233,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
         if (grantResults[0] == 0)
             recyclerAdapter.downloadAfterPermissionGranted();
         if (grantResults[0] == -1) {
-            Toast.makeText(this,"You cannot download gifs without the permission",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You cannot download gifs without the permission", Toast.LENGTH_SHORT).show();
         }
     }
 }

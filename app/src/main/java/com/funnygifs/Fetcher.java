@@ -16,11 +16,10 @@ import java.util.List;
 
 public class Fetcher {
 
-    private static final String TAG = "FlickrFetchr";
     private String link;
 
-    public Fetcher(String linkPassed) {
-        link = linkPassed;
+    public Fetcher(String link) {
+        this.link = link;
     }
 
     public byte[] getUrlBytes(String urlSpec) throws IOException {
@@ -55,13 +54,13 @@ public class Fetcher {
 
         try {
             String jsonString = getUrlString(link);
-            Log.i(TAG, "Received JSON: " + jsonString);
+            Log.i("Fetch", "Received JSON: " + jsonString);
             JSONArray jsonBody = new JSONArray(jsonString);
             parseItems(items, jsonBody);
         } catch (IOException ioe) {
-            Log.e(TAG, "Failed to fetch items", ioe);
+            Log.e("Fetch", "Failed to fetch items", ioe);
         } catch (JSONException je) {
-            Log.e(TAG, "Failed to parse JSON", je);
+            Log.e("Fetch", "Failed to parse JSON", je);
         }
 
         return items;
@@ -72,6 +71,7 @@ public class Fetcher {
 
         for (int i = 0; i < jsonBody.length(); i++) {
             JSONObject photoJsonObject = jsonBody.getJSONObject(i);
+
             FetchedItem item = new FetchedItem();
             item.setId(photoJsonObject.getString("id"));
             item.setTitle(photoJsonObject.getString("title"));
